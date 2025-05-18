@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Store Management System</h1>
+  </header>
+  <main>
+    <section id="product-form">
+      <h2>Add Product</h2>
+      <form id="addProductForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required>
+        
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required>
+        
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category">
+        
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea>
+        
+        <button type="submit">Add Product</button>
+      </form>
+    </section>
+    
+    <section id="product-list">
+      <h2>Products</h2>
+      <ul id="products"></ul>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

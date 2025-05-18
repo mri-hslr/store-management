@@ -1,0 +1,27 @@
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node modules (for Node.js projects)
+node_modules/
+
+# Environment variables
+.env
+
+# Build outputs
+dist/
+build/
+
+# Cache & temp files
+.cache/
+*.tmp
+*.swp
+
+# IDE/editor-specific
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
