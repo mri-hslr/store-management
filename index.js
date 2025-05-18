@@ -4,25 +4,19 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs'); // For password hashing
-const  Product  =require ('./db.js');
-const user=require('./db.js')
+const {Product,user}=require("./db");
 
 const app = express();
 const PORT = 4000;
-app.get("/",function(req,res){
-  res.json({
-    message:"i am really sorry!!!!!!!!!!!!!",
-    message1:"really sorry, i meant it.!!!!!!!!!!!!!!!!!",
-    message2:"sorry🥺",
-    message3:"please forgive me"
-  })
+app.get("/",(req,res)=>{
+  res.sendFile(__dirname+ "/index.html");
 })
 // Middleware
 app.use(express.json());
 app.use(cors());
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://hslrsharmasingh:323112rm@cluster0.skwiapv.mongodb.net/storemanagement', {
+mongoose.connect('mongodb+srv://hslrsharmasingh:323112rm@cluster0.skwiapv.mongodb.net/bisht', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -38,13 +32,19 @@ app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    user.create({
+    const usertstatus=await user.create({
       username:username,
       password:hashedPassword
     })
-    res.status(201).json({ message: 'User registered successfully' });
+    if(usertstatus){
+      res.sendStatus(200).send("user registered sucessfully")
+    }
+    else{
+      res.status(400).send("user not registered");
+    }
   } catch (err) {
-    res.status(400).json({ error: 'Failed to register user' });
+    console.log(err);
+    res.status(400).json({ error: 'error occured with registration' });
   }
 });
 
@@ -52,24 +52,41 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await user.findOne({ username });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    const userstatus = await user.findOne({ username });
+
+    if (!userstatus) {
+      // User not found
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+
+    const match = await bcrypt.compare(password, userstatus.password);
+
+    if (!match) {
+      // Password doesn't match
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const token = jwt.sign(
+      { userId: userstatus._id, role: userstatus.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return res.status(200).json({ token });  // send token as JSON response
   } catch (err) {
-    res.status(400).json({ error: 'Failed to log in' });
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to log in' });
   }
 });
 
+
 // Middleware to Verify JWT
 function authenticate(req, res, next) {
-  const token = req.headers.token?.split(' ')[1];
+  const token = req.headers.token;
   if (!token) return res.status(401).json({ error: 'Access denied' });
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    req.userid = decoded.userId;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -86,25 +103,19 @@ function adminOnly(req, res, next) {
 // Get all products with Pagination and Filtering
 app.get('/products', authenticate, async (req, res) => {
   try {
-    const { page = 1, limit = 10, category, name } = req.query;
-    const query = {};
-    if (category) query.category = category;
-    if (name) query.name = new RegExp(name, 'i');
-    const products = await Product.find(query)
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-    const total = await Product.countDocuments(query);
-    res.json({ products, total });
+    const products=await Product.find({});
+    res.send(products);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
 // Add a new product
-app.post('/products', authenticate, adminOnly, async (req, res) => {
+app.post('/products', authenticate,  async (req, res) => {
   try {
     const { name, price, quantity, category, description,threshold } = req.body;
-    Product.create({
+    await Product.create({
       name:name,
        price:price,
        quantity:quantity,
@@ -112,30 +123,45 @@ app.post('/products', authenticate, adminOnly, async (req, res) => {
         description:description,
         threshold:threshold
     })
-    await Product.save();
-    res.status(201).json(Product);
+    res.status(201).json({
+      message:"product added"
+    });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ error: 'Failed to add product' });
   }
 });
 
 // Update a product
-app.put('/products/:id', authenticate, adminOnly, async (req, res) => {
+app.put('/products/update', authenticate,  async (req, res) => {
   try {
-    const { id } = req.params;
+    const  id  = req.headers.id;
     const updates = req.body;
-    const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });
-    if (!updatedProduct) return res.status(404).json({ error: 'Product not found' });
-    res.json(updatedProduct);
+    console.log(id);
+    const found=await Product.find({
+      _id:id
+    })
+    if(found){
+      await Product.updateOne(updates);
+      res.json({
+        message:"product updated succesfully !!"
+      })
+    }
+    else{
+      res.json({
+      message:"product not found"
+      })
+    }
   } catch (err) {
+    console.log(err);
     res.status(400).json({ error: 'Failed to update product' });
   }
 });
 
 // Delete a product
-app.delete('/products/:id', authenticate, adminOnly, async (req, res) => {
+app.delete('/products/delete', authenticate, adminOnly, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.headers.id;
     await Product.findByIdAndDelete(id);
     res.json({ message: 'Product deleted' });
   } catch (err) {
@@ -155,10 +181,10 @@ app.get('/products/low-stock', authenticate, async (req, res) => {
   }
 });
 //restock product
-app.post('/products/:id/restock', authenticate, adminOnly, async (req, res) => {
+app.post('/products/restock', authenticate, adminOnly, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { amount } = req.body;
+    const id = req.headers.id;
+    const amount = req.body;
     if (amount <= 0) return res.status(400).json({ error: 'Invalid restock amount' });
 
     const product = await Product.findById(id);
@@ -175,29 +201,9 @@ app.post('/products/:id/restock', authenticate, adminOnly, async (req, res) => {
 
 //update product info
 // Update product by ID
-app.put('/updateproduct/:id', async function (req, res){
-  try {
-    const productId = req.params.id;
-    const updates = req.body;
 
-    if (updates.price < 0 || updates.quantity < 0 || updates.threshold < 0) {
-      return res.status(400).json({ error: "Invalid update values" });
-    }
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
-    if (!updatedProduct) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-    res.json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update product" });
-  }
-});
 // Inventory summary
-router.get('/summary', async (req, res) => {
+app.get('/summary', async (req, res) => {
   try {
     const totalProducts = await Product.countDocuments();
 
