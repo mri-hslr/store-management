@@ -1,87 +1,170 @@
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
+/* styles.css */
+
+/* Base reset */
+* {
   margin: 0;
   padding: 0;
-  background-color: #f4f4f9;
-  color: #333;
-}
-
-header {
-  background-color: #007BFF;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-}
-
-main {
-  padding: 20px;
-  display: flex;
-  gap: 20px;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-section {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-  margin-top: 0;
-  color: #007BFF;
-}
-
-label {
-  display: block;
-  margin-top: 10px;
-}
-
-input, textarea, button {
-  width: 100%;
-  margin-top: 5px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
   box-sizing: border-box;
 }
 
+/* Root theme colors & typography */
+:root {
+  --bg-dark: #f5f6fc;
+  --bg-gradient: linear-gradient(135deg, #f5f6fc 0%, #eaeafc 100%);
+  --bg-panel: #ffffff;
+  --bg-panel-light: #f0f0fb;
+  --accent-primary: #a78bfa;
+  --accent-secondary: #b197fc;
+  --accent-highlight: #c4b5fd;
+  --text-light: #3f3f46;
+  --text-muted: #71717a;
+  --font-heading: 'Merriweather', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* Global body */
+body {
+  background: var(--bg-gradient);
+  color: var(--text-light);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  padding: 2rem;
+}
+
+/* Container sections */
+section {
+  background: var(--bg-panel);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(160, 160, 255, 0.15);
+  margin-bottom: 3rem;
+  padding: 2.5rem;
+  transition: background 0.3s;
+}
+section:hover {
+  background: var(--bg-panel-light);
+}
+
+/* Headings */
+h1, h2 {
+  font-family: var(--font-heading);
+  color: var(--accent-primary);
+  margin-bottom: 1.5rem;
+}
+h1 {
+  font-size: 2.8rem;
+}
+h2 {
+  font-size: 2.2rem;
+}
+
+/* Forms & Inputs */
+form {
+  display: grid;
+  grid-gap: 1.5rem;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: var(--text-light);
+}
+input, textarea {
+  margin-top: 0.6rem;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f5f6fc;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: border 0.3s, background 0.3s;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-highlight);
+  background: #ffffff;
+}
+
+/* Buttons */
 button {
-  background-color: #007BFF;
+  background: var(--accent-primary);
   color: white;
-  cursor: pointer;
+  font-weight: bold;
+  padding: 1rem 1.8rem;
   border: none;
-  margin-top: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s;
 }
-
 button:hover {
-  background-color: #0056b3;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(167, 139, 250, 0.4);
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+  margin-top: 2rem;
+  background: transparent;
+}
+th, td {
+  padding: 1.2rem 1.5rem;
+  text-align: left;
+  background: #f4f4fd;
+  color: var(--text-light);
+}
+th {
+  background: #e5e5f7;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+tbody tr {
+  border-radius: 10px;
+  transition: background 0.3s, transform 0.2s ease;
+}
+tbody tr:hover {
+  background: rgba(167, 139, 250, 0.1);
+  transform: scale(1.01);
+}
+td:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+td:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
-li {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background-color: #f9f9f9;
+/* Logout button alignment */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+#logoutBtn {
+  font-size: 1rem;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  transition: background 0.3s, color 0.3s;
+}
+#logoutBtn:hover {
+  background: var(--accent-primary);
+  color: white;
 }
 
-li button {
-  background-color: #dc3545;
-  margin-top: 0;
-}
-
-li button:hover {
-  background-color: #a71d2a;
+/* Error text */
+#login-error {
+  margin-top: 1.2rem;
+  color: #f87171;
+  font-style: italic;
+  font-size: 0.95rem;
 }

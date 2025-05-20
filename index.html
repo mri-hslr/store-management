@@ -1,208 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Store + Login</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8">
+  <title>Inventory Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
-  <section id="login-section">
-    <h2>Log In</h2>
+  <h1>Inventory Management System</h1>
+
+  <!-- LOGIN SECTION -->
+  <div id="loginSection">
     <form id="loginForm">
-      <label>Username: <input type="text" name="username" required></label><br/>
-      <label>Password: <input type="password" name="password" required></label><br/>
-      <button type="submit">Log In</button>
+      <h2>Login</h2>
+      <label>Username: <input type="text" name="username" required></label><br>
+      <label>Password: <input type="password" name="password" required></label><br>
+      <button type="submit">Login</button>
     </form>
-    <p id="login-error" style="color:red;"></p>
-  </section>
+  </div>
 
-  <!-- STORE SYSTEM (hidden until you’re logged in) -->
-  <section id="app-section" style="display: none;">
-    <header>
-      <h1>Store Management System</h1>
-      <button onclick="logout()" id="logoutBtn">Logout</button>
-    </header>
+  <!-- REGISTER SECTION -->
+  <div id="registerSection">
+    <form id="registerForm">
+      <h2>Register</h2>
+      <label>Username: <input type="text" name="username" required></label><br>
+      <label>Password: <input type="password" name="password" required></label><br>
+      <button type="submit">Register</button>
+    </form>
+    <p id="register-error" style="color:red;"></p>
+  </div>
 
-    <main>
-      <section id="product-form">
-        <h2>Add Product</h2>
-        <form id="addProductForm">
-          <label for="name">Name:</label>
-          <input type="text" id="name" name="name" required>
+  <!-- DASHBOARD SECTION -->
+  <div id="appSection" style="display: none;">
+    <button onclick="logout()">Logout</button>
 
-          <label for="price">Price:</label>
-          <input type="number" id="price" name="price" required>
+    <!-- ADD PRODUCT FORM -->
+    <form id="productForm">
+      <h2>Add Product</h2>
+      <label>Name: <input type="text" name="name" required></label><br>
+      <label>Price: <input type="number" name="price" required></label><br>
+      <label>Quantity: <input type="number" name="quantity" required></label><br>
+      <label>Category: <input type="text" name="category"></label><br>
+      <label>Threshold: <input type="number" name="threshold"></label><br>
+      <button type="submit">Add Product</button>
+    </form>
 
-          <label for="quantity">Quantity:</label>
-          <input type="number" id="quantity" name="quantity" required>
+    <!-- GET PRODUCTS -->
+    <button onclick="fetchProducts()">Get All Products</button>
+    <table border="1" id="productTable">
+      <thead>
+        <tr>
+          <th>Name</th><th>Price</th><th>Quantity</th><th>Category</th><th>Threshold</th>
+        </tr>
+      </thead>
+      <tbody id="productList"></tbody>
+    </table>
 
-          <label for="category">Category:</label>
-          <input type="text" id="category" name="category">
+    <!-- UPDATE PRODUCT -->
+    <section>
+      <h2>Update Product</h2>
+      <form id="updateForm">
+        <label>Product ID: <input type="text" id="updateId" required></label><br>
+        <label>New Name: <input type="text" id="updateName"></label><br>
+        <label>New Price: <input type="number" id="updatePrice"></label><br>
+        <label>New Quantity: <input type="number" id="updateQuantity"></label><br>
+        <button type="submit">Update Product</button>
+      </form>
+    </section>
 
-          <label for="description">Description:</label>
-          <textarea id="description" name="description"></textarea>
+    <!-- DELETE PRODUCT -->
+    <section>
+      <h2>Delete Product</h2>
+      <input type="text" id="deleteId" placeholder="Enter Product ID">
+      <button onclick="deleteProduct()">Delete</button>
+    </section>
 
-          <button  id="submit" type="submit">Add Product</button>
-        </form>
-      </section>
+    <!-- LOW STOCK PRODUCTS -->
+    <section>
+      <h2>Low Stock Products</h2>
+      <button onclick="fetchLowStock()">Check Low Stock</button>
+      <table border="1" id="lowStockTable">
+        <thead>
+          <tr><th>Name</th><th>Quantity</th><th>Threshold</th></tr>
+        </thead>
+        <tbody id="low-stock-list"></tbody>
+      </table>
+    </section>
 
-      <section id="product-list">
-        <h2>Products</h2>
-        <table border="1" id="products-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Price (₹)</th>
-              <th>Quantity</th>
-              <th>Category</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody id="products-body">
-            <!-- JS will insert rows here -->
-          </tbody>
-        </table>
-      </section>      
-    </main>
-  </section>
+    <!-- INVENTORY SUMMARY -->
+    <section>
+      <h2>Inventory Summary</h2>
+      <button onclick="getSummary()">Get Summary</button>
+      <div id="summary-result"></div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script >
+    <!-- SEARCH PRODUCTS -->
+    <section>
+      <h2>Search Products</h2>
+      <form id="searchForm">
+        <input type="text" id="searchName" placeholder="Name">
+        <input type="text" id="searchCategory" placeholder="Category">
+        <input type="number" id="priceMin" placeholder="Min Price">
+        <input type="number" id="priceMax" placeholder="Max Price">
+        <button type="submit">Search</button>
+      </form>
+      <table border="1" id="searchTable">
+        <thead>
+          <tr><th>Name</th><th>Category</th><th>Price</th></tr>
+        </thead>
+        <tbody id="search-results"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
     const API_URL = 'http://localhost:4000';
-const loginForm = document.getElementById('loginForm');
-const loginSection = document.getElementById('login-section');
-const appSection   = document.getElementById('app-section');
-const logoutBtn    = document.getElementById('logoutBtn');
-const loginError   = document.getElementById('login-error');
 
-document.getElementById("submit").addEventListener("click",addprod)
+    function showLoginScreen() {
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('registerSection').style.display = 'block';
+      document.getElementById('appSection').style.display = 'none';
+    }
 
-// On page load, decide which section to show:
-document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    // Already logged in
-    showApp();
-  } else {
-    showLogin();
-  }
-});
+    function showAppScreen() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('registerSection').style.display = 'none';
+      document.getElementById('appSection').style.display = 'block';
+    }
 
-async function addprod(event) {
-  event.preventDefault();
+    function checkLogin() {
+      const token = localStorage.getItem('token');
+      token ? showAppScreen() : showLoginScreen();
+    }
 
-  const product = {
-    name: document.getElementById("name").value,
-    price: document.getElementById("price").value,
-    quantity: document.getElementById("quantity").value,
-    category: document.getElementById("category").value,
-    description: document.getElementById("description").value // ✅ fixed this line
-  };
+    window.onload = checkLogin;
 
-  console.log("called");
+    function logout() {
+      localStorage.removeItem('token');
+      alert('Logged out');
+      showLoginScreen();
+    }
 
-  const token = localStorage.getItem("token");
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { username, password } = e.target;
+      const res = await axios.post(`${API_URL}/login`, {
+        username: username.value, password: password.value
+      });
+      localStorage.setItem('token', res.data.token);
+      alert('Login successful');
+      showAppScreen();
+    });
 
-  try {
-    const response = await axios.post(
-      `${API_URL}/products`,
-      product, // ✅ don't wrap it in `{ product }`
-      {
-        headers: {
-          token: token // ✅ send token like this
-        }
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { username, password } = e.target;
+      try {
+        await axios.post(`${API_URL}/register`, { username: username.value, password: password.value });
+        alert("Registration successful! Now log in.");
+      } catch {
+        document.getElementById('register-error').textContent = 'Registration failed';
       }
-    );
-
-    alert("Product added successfully!");
-    fetchProducts();
-  } catch (err) {
-    console.error("Failed to add product", err);
-    alert("Failed to add product");
-  }
-}
-
-  
-
-
-// Show login screen
-function showLogin() {
-  loginSection.style.display = '';
-  appSection.style.display   = 'none';
-}
-
-function logger(){
-  console.log("hehe");
-}
-
-// Show store UI
-function showApp() {
-  loginSection.style.display = 'none';
-  appSection.style.display   = '';
-  // Initialize your product-fetching, form-hooks, etc.
-}
-
-async function fetchProducts() {
-  const token = localStorage.getItem("token");
-  try {
-    const response = await axios.get(`${API_URL}/products`, {
-      headers: { token },
     });
 
-    const products = response.data;
-    const tbody = document.getElementById("products-body");
-    tbody.innerHTML = ""; // Clear existing rows
-
-    products.forEach(product => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${product.name}</td>
-        <td>${product.price}</td>
-        <td>${product.quantity}</td>
-        <td>${product.category}</td>
-        <td>${product.description}</td>
-      `;
-      tbody.appendChild(row);
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const token = localStorage.getItem('token');
+      const product = {
+        name: form.name.value,
+        price: form.price.value,
+        quantity: form.quantity.value,
+        category: form.category.value,
+        threshold: form.threshold.value
+      };
+      await axios.post(`${API_URL}/products`, product, { headers: { token } });
+      alert('Product added');
+      fetchProducts();
     });
-  } catch (err) {
-    console.error("Failed to fetch products", err);
-  }
-}
 
+    async function fetchProducts() {
+      const res = await axios.get(`${API_URL}/products`, {
+        headers: { token: localStorage.getItem('token') }
+      });
+      const tbody = document.getElementById('productList');
+      tbody.innerHTML = '';
+      res.data.forEach(p => {
+        tbody.innerHTML += `<tr>
+          <td>${p.name}</td><td>${p.price}</td><td>${p.quantity}</td>
+          <td>${p.category}</td><td>${p.threshold}</td>
+        </tr>`;
+      });
+    }
 
+    document.getElementById('updateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('updateId').value;
+      const updates = {
+        name: document.getElementById('updateName').value,
+        price: document.getElementById('updatePrice').value,
+        quantity: document.getElementById('updateQuantity').value
+      };
+      await axios.put(`${API_URL}/products/update`, updates, {
+        headers: { token: localStorage.getItem('token'), id }
+      });
+      alert('Product updated');
+      fetchProducts();
+    });
 
-// Trigger fetch on page load
-document.addEventListener('DOMContentLoaded', fetchProducts);
+    async function deleteProduct() {
+      const id = document.getElementById('deleteId').value;
+      await axios.delete(`${API_URL}/products/delete`, {
+        headers: { token: localStorage.getItem('token'), id }
+      });
+      alert('Product deleted');
+      fetchProducts();
+    }
 
-// Handle login form submit
-loginForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const formData = new FormData(loginForm);
-  const credentials = {
-    username: formData.get('username'),
-    password: formData.get('password')
-  };
+    async function fetchLowStock() {
+      const res = await axios.get(`${API_URL}/products/low-stock`, {
+        headers: { token: localStorage.getItem('token') }
+      });
+      const tbody = document.getElementById('low-stock-list');
+      tbody.innerHTML = '';
+      res.data.lowStockProducts.forEach(p => {
+        tbody.innerHTML += `<tr>
+          <td>${p.name}</td><td>${p.quantity}</td><td>${p.threshold}</td>
+        </tr>`;
+      });
+    }
 
-  try {
-    const res = await axios.post(`${API_URL}/login`, credentials);
-    localStorage.setItem('token', res.data.token);
-    loginError.textContent = '';
-    showApp();
-  } catch (err) {
-    console.log("error");
-  }
-});
+    async function getSummary() {
+      const res = await axios.get(`${API_URL}/summary`);
+      const { totalProducts, lowStockCount, totalValue } = res.data;
+      document.getElementById('summary-result').innerHTML = `
+        <p>Total Products: ${totalProducts}</p>
+        <p>Low Stock Products: ${lowStockCount}</p>
+        <p>Total Inventory Value: ₹${totalValue}</p>`;
+    }
 
-function logout(){
-  localStorage.removeItem('token');
-  showLogin();
-}
-
-// (Re-use your existing addprod + fetchProducts here, just
-//  always include the stored token in the Authorization header.)
-
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('searchName').value;
+      const category = document.getElementById('searchCategory').value;
+      const priceMin = document.getElementById('priceMin').value;
+      const priceMax = document.getElementById('priceMax').value;
+      const res = await axios.get(`${API_URL}/search`, {
+        params: { name, category, priceMin, priceMax }
+      });
+      const results = document.getElementById('search-results');
+      results.innerHTML = '';
+      res.data.forEach(product => {
+        results.innerHTML += `<tr>
+          <td>${product.name}</td><td>${product.category}</td><td>${product.price}</td>
+        </tr>`;
+      });
+    });
   </script>
 </body>
 </html>
